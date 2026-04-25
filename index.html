@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ozzie Smith — De Novo Protein Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Share+Tech+Mono&family=Exo+2:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #020408;
+    --surface: #060d14;
+    --surface2: #0a1520;
+    --border: rgba(0,200,255,0.1);
+    --border2: rgba(0,200,255,0.22);
+    --text: #c8dce8;
+    --muted: #4a6b7a;
+    --accent: #00c8ff;
+    --accent2: #0077aa;
+    --green: #00ff9d;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Orbitron', sans-serif;
+    --body: 'Exo 2', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 34% 72%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 56% 11%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 78% 45%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 91% 83%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 23% 91%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 67% 59%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 35%, rgba(255,255,255,0.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 8% 55%, rgba(255,255,255,0.35) 0%, transparent 100%),
+      radial-gradient(1px 1px at 88% 22%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 40%, rgba(0,200,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 72% 78%, rgba(0,200,255,0.3) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .ambient {
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,120,200,0.06) 0%, transparent 70%);
+    top: -200px;
+    right: -100px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ambient2 {
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,255,157,0.04) 0%, transparent 70%);
+    bottom: 100px;
+    left: -100px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 2;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  header {
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--border2);
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(32px, 5vw, 58px);
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.08;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    text-shadow: 0 0 40px rgba(0,200,255,0.25);
+  }
+
+  .h1-sub {
+    font-family: var(--display);
+    font-size: clamp(13px, 2vw, 18px);
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: 0.14em;
+    margin-bottom: 24px;
+    text-shadow: 0 0 20px rgba(0,200,255,0.4);
+  }
+
+  .tagline {
+    font-family: var(--body);
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.9;
+    margin-bottom: 28px;
+    font-style: italic;
+  }
+
+  .contact-line {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+  }
+
+  .contact-line a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0,200,255,0.3);
+    padding-bottom: 1px;
+    transition: all 0.2s;
+  }
+
+  .contact-line a:hover {
+    color: #ffffff;
+    border-color: #ffffff;
+    text-shadow: 0 0 12px rgba(0,200,255,0.6);
+  }
+
+  main { padding-bottom: 80px; }
+
+  section {
+    margin-top: 60px;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  section:nth-child(2) { animation-delay: 0.08s; }
+  section:nth-child(3) { animation-delay: 0.14s; }
+  section:nth-child(4) { animation-delay: 0.2s; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border2), transparent);
+  }
+
+  .tier-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1px;
+    background: var(--border2);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .tier-card {
+    background: var(--surface);
+    padding: 28px 22px;
+    transition: background 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tier-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: transparent;
+    transition: background 0.25s;
+  }
+
+  .tier-card:hover { background: var(--surface2); }
+  .tier-card:hover::before { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+  .tier-card.featured { background: var(--surface2); }
+  .tier-card.featured::before { background: var(--accent); box-shadow: 0 0 16px rgba(0,200,255,0.5); }
+
+  .featured-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .featured-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .tier-name {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .tier-price {
+    font-family: var(--display);
+    font-size: 30px;
+    font-weight: 500;
+    color: #ffffff;
+    line-height: 1;
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  .tier-card.featured .tier-price { text-shadow: 0 0 24px rgba(0,200,255,0.3); }
+
+  .tier-unit {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    letter-spacing: 0.06em;
+  }
+
+  .tier-divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 16px;
+  }
+
+  .tier-features { list-style: none; }
+
+  .tier-features li {
+    font-size: 12px;
+    font-weight: 300;
+    color: #3d5a6a;
+    padding: 3px 0 3px 16px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .tier-features li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--border2);
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .tier-features li.hl { color: var(--text); }
+  .tier-features li.hl::before { color: var(--accent); }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    border: 1px solid var(--border2);
+  }
+
+  .data-table th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border2);
+    font-weight: 400;
+    background: var(--surface);
+  }
+
+  .data-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+    font-weight: 300;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+
+  .price-tag {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .note-col { color: var(--muted); font-size: 11px; }
+
+  .terms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--border2);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .term-item {
+    background: var(--surface);
+    padding: 20px 22px;
+    transition: background 0.2s;
+  }
+
+  .term-item:hover { background: var(--surface2); }
+
+  .term-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 8px;
+  }
+
+  .term-value {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  footer {
+    border-top: 1px solid var(--border2);
+    padding: 28px 0 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-name {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .footer-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .wrapper { padding: 0 20px; }
+    header { padding-top: 48px; }
+    .tier-grid, .terms-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient"></div>
+<div class="ambient2"></div>
+
+<div class="wrapper">
+
+  <header>
+    <p class="eyebrow">Services &amp; Rates — 2026</p>
+    <h1>OZZIE SMITH</h1>
+    <p class="h1-sub">De Novo Protein Design</p>
+    <p class="tagline">
+      Computational protein design for biotech and pharmaceutical research teams.
+      De novo scaffold engineering, AI-driven sequence generation, and structure
+      validation using current best-in-class pipelines.
+    </p>
+    <p class="contact-line"><a href="mailto:[your@email.com]">[your@email.com]</a></p>
+  </header>
+
+  <main>
+
+    <section>
+      <p class="section-label">Core Engagement Tiers</p>
+      <div class="tier-grid">
+
+        <div class="tier-card">
+          <p class="tier-name">Hourly Advisory</p>
+          <p class="tier-price">$200</p>
+          <p class="tier-unit">per hour &middot; 5 hr minimum</p>
+          <div class="tier-divider"></div>
+          <ul class="tier-features">
+            <li>Pipeline review &amp; consultation</li>
+            <li>Sequence design strategy</li>
+            <li>Tool selection &amp; workflow guidance</li>
+            <li>Written summary of recommendations</li>
+          </ul>
+        </div>
+
+        <div class="tier-card featured">
+          <p class="featured-badge">Most Popular</p>
+          <p class="tier-name">Pilot Project</p>
+          <p class="tier-price">$8,500</p>
+          <p class="tier-unit">fixed fee &middot; 2&ndash;3 week delivery</p>
+          <div class="tier-divider"></div>
+          <ul class="tier-features">
+            <li class="hl">De novo scaffold design (1 target)</li>
+            <li class="hl">ESM-3 sequence generation &amp; optimization</li>
+            <li class="hl">RFdiffusion structure backbone</li>
+            <li class="hl">AlphaFold structure prediction</li>
+            <li>MD simulation validation (GROMACS)</li>
+            <li>Full technical report &amp; deliverable package</li>
+          </ul>
+        </div>
+
+        <div class="tier-card">
+          <p class="tier-name">Full Engagement</p>
+          <p class="tier-price">$14,000</p>
+          <p class="tier-unit">per month &middot; 3 mo minimum</p>
+          <div class="tier-divider"></div>
+          <ul class="tier-features">
+            <li>Multi-target design campaigns</li>
+            <li>End-to-end pipeline management</li>
+            <li>Weekly progress reporting</li>
+            <li>Unlimited revision cycles</li>
+            <li>Priority turnaround</li>
+            <li>IP guidance &amp; documentation support</li>
+          </ul>
+        </div>
+
+        <div class="tier-card">
+          <p class="tier-name">DDaaS Partnership</p>
+          <p class="tier-price">Custom</p>
+          <p class="tier-unit">scoped per program</p>
+          <div class="tier-divider"></div>
+          <ul class="tier-features">
+            <li>Drug discovery co-development</li>
+            <li>Multi-phase design campaigns</li>
+            <li>Computational screening at scale</li>
+            <li>Milestone-based billing available</li>
+            <li>Data licensing options</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Add-On Services</p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Price</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Rush Delivery (under 7 days)</td>
+            <td class="price-tag">+40% of project fee</td>
+            <td class="note-col">Subject to availability</td>
+          </tr>
+          <tr>
+            <td>MD Simulation Package (GROMACS full run + analysis)</td>
+            <td class="price-tag">$2,500 / target</td>
+            <td class="note-col">Add to any tier</td>
+          </tr>
+          <tr>
+            <td>Additional Protein Targets (added to Pilot scope)</td>
+            <td class="price-tag">$3,500 / target</td>
+            <td class="note-col">&mdash;</td>
+          </tr>
+          <tr>
+            <td>Technical Report Only (analysis of existing sequences)</td>
+            <td class="price-tag">$1,800 flat</td>
+            <td class="note-col">&mdash;</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <p class="section-label">Engagement Terms</p>
+      <div class="terms-grid">
+        <div class="term-item">
+          <p class="term-label">Payment Structure</p>
+          <p class="term-value">50% deposit upon SOW signing &middot; 50% upon delivery</p>
+        </div>
+        <div class="term-item">
+          <p class="term-label">Accepted Payment</p>
+          <p class="term-value">ACH &middot; Wire transfer &middot; Payment due immediately</p>
+        </div>
+        <div class="term-item">
+          <p class="term-label">IP Ownership</p>
+          <p class="term-value">Client retains full rights to deliverables upon final payment</p>
+        </div>
+        <div class="term-item">
+          <p class="term-label">Capacity</p>
+          <p class="term-value">Limited concurrent engagements &mdash; availability confirmed at SOW</p>
+        </div>
+        <div class="term-item">
+          <p class="term-label">Confidentiality</p>
+          <p class="term-value">Mutual NDA available upon request prior to scoping</p>
+        </div>
+        <div class="term-item">
+          <p class="term-label">Scope Changes</p>
+          <p class="term-value">Change orders required in writing &middot; Billed at hourly rate</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p class="footer-name">OZZIE SMITH</p>
+    <p class="footer-meta">Effective April 2026 &middot; Rates subject to change</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
